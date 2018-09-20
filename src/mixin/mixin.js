@@ -1,5 +1,6 @@
 import co from 'co'
 import WPAPI from 'wpapi'
+import { driver} from '@rocket.chat/sdk'
 import configs from '../configs.js'
 
 //ajax
@@ -81,10 +82,17 @@ export default {
     return {
       currWebsite: undefined,
       currWebsiteApi: undefined,
+      HOST: 'chat.bymarx.org',
+      USER: 'suyi',
+      PASS: '90909bu0',
+      BOTNAME: 'easybot',
+      SSL: true,
+      ROOMS: ['testroom'],
     };
   },
   beforeMount() {
     this.initWpApi();
+    this.runbot();
   },
   methods: {
     initWpApi() {
@@ -99,6 +107,41 @@ export default {
           }
         }
       });
+    },
+    runbot: async function (){
+      var myuserid;
+      const conn = await driver.connect( { host: this.HOST, useSsl: this.SSL})
+      myuserid = await driver.login({username: this.USER, password: this.PASS});
+      const roomsJoined = await driver.joinRooms(this.ROOMS);
+      console.log('joined rooms');
+      // set up subscriptions - rooms we are interested in listening to
+      const subscribed = await driver.subscribeToMessages();
+      console.log('subscribed');
+
+      // connect the processMessages callback
+      const msgloop = await driver.reactToMessages( this.processMessages );
+      console.log('connected and waiting for messages');
+
+      // when a message is created in one of the ROOMS, we
+      // receive it in the processMesssages callback
+
+      // greets from the first room in ROOMS
+      const sent = await driver.sendToRoom( this.BOTNAME + ' is listening ...',this.ROOMS[0]);
+      console.log('Greeting message sent');
+    },
+    processMessages: async function (err, message, messageOptions) {
+      if (!err) {
+        // filter our own message
+        if (message.u._id === myuserid) return;
+        // can filter further based on message.rid
+        const roomname = await driver.getRoomName(message.rid);
+        if (message.msg.toLowerCase().startsWith(this.BOTNAME)) {
+          const response = message.u.username +
+            ', how can ' + this.BOTNAME + ' help you with ' +
+            message.msg.substr(this.BOTNAME.length + 1);
+          const sentmsg = await driver.sendToRoom(response, roomname);
+        }
+      }
     },
     _ajax({
             url = this.rootAPI,

@@ -31,11 +31,12 @@
   },
   "homepage": "http://framework7.io/vue/",
   "dependencies": {
-    "framework7": "^3.0.0",
+    "@rocket.chat/sdk": "^0.2.7",
+    "framework7": "^3.3.1",
     "framework7-icons": "^0.9.1",
-    "framework7-vue": "^3.0.0",
+    "framework7-vue": "^3.3.1",
     "material-design-icons": "^3.0.1",
-    "vue": "^2.5.16",
+    "vue": "^2.5.17",
     "vuex": "^3.0.1",
     "wpapi": "^1.1.2"
   },
